@@ -1,13 +1,17 @@
 import { useEffect } from "react"
 import { useState } from "react"
+import TypeCard from './TypeCard'
 import { getPokedexNumber } from "../utils"
-export function PokeCard(props){
+import { getFullPokedexNumber } from "../utils"
+export default function PokeCard(props){
 
     const {selectedPokemon} = props
 
     const [data, setData] = useState(null) //sets the display data for each pokemon
 
     const [loading, setLoading] = useState(false)
+
+    const{name,height,abilities,stats,types,moves,sprites} = data || {} //if data is null, then we will set all of these to null
 
     useEffect(() => { //this is a hook that runs every time the selectedPokemon changes
         // if loading, exit
@@ -58,9 +62,23 @@ export function PokeCard(props){
 
     }, [selectedPokemon]) 
 
+    if(loading || !data){
+        return <div>loading...</div>
+    }
+
     return(
-        <div>
-            
+        <div className="poke-card">
+            <div>
+                <h4>#{getFullPokedexNumber(selectedPokemon)}</h4>
+                <h2>{name}</h2>
+            </div>
+            <div className="type-container">
+                {types.map((typeObj,typeIndex) => {
+                    return (
+                        <TypeCard key = {typeIndex} type = {typeObj?.type?.name} />
+                    )
+                })}
+            </div>
         </div>
     )
 }

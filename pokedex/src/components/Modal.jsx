@@ -1,3 +1,3 @@
-export function Modal(){
+export default function Modal(){
     return //an overlay that will display the details of a pokemon
 }
