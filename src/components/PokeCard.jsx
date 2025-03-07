@@ -16,8 +16,8 @@ export default function PokeCard(props) {
     name: "Lola",
     types: [{ type: { name: "fairy" } }],
     stats: [
-      { stat: { name: "hp" }, base_stat: 100 },
-      { stat: { name: "attack" }, base_stat: 50 },
+      { stat: { name: "hp" }, base_stat: 444 },
+      { stat: { name: "attack" }, base_stat: 29 },
       { stat: { name: "defense" }, base_stat: 70 },
       { stat: { name: "special-attack" }, base_stat: 90 },
       { stat: { name: "special-defense" }, base_stat: 85 },
