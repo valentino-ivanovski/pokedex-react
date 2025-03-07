@@ -13,6 +13,13 @@ export default function PokeCard(props){
 
     const{name,height,abilities,stats,types,moves,sprites} = data || {} //if data is null, then we will set all of these to null
 
+    //filter empty sprite elements from the list in api
+    const imgList = Object.keys(sprites || {}).filter(val => {
+        if (!sprites[val]){return false}
+        if(['versions', 'other'].includes(val)){return false}
+        return true
+    })
+
     useEffect(() => { //this is a hook that runs every time the selectedPokemon changes
         // if loading, exit
         if (loading || !localStorage){
@@ -80,6 +87,37 @@ export default function PokeCard(props){
                 })}
             </div>
             <img className="default-image" src={"/pokemon/" + getFullPokedexNumber(selectedPokemon) + ".png" } alt="Pokemon Image"/>
+            <div className = 'img-container'>
+                {imgList.map((spriteUrl,spriteIndex) => {
+                    const imgUrl = sprites[spriteUrl]
+                    return (
+                        <img key = {spriteIndex} src = {imgUrl} alt = {"sprite"}/>
+                    )
+                }
+                )}
+            </div>
+            <h3>Stats</h3>
+            <div className='stats-card'>
+                {stats.map((statObj, statIndex)=>{
+                    const {stat,base_stat}= statObj
+                    return(
+                        <div key={statIndex} className='stat-item'>
+                            <p>{stat?.name.replaceAll('-', ' ')}</p>
+                            <h4>{base_stat}</h4>
+                        </div>
+                    )
+                })}
+            </div>
+            <h3>Moves</h3>
+            <div className='pokemon-move-grid'>
+                {moves.map((moveObj, moveIndex) => {
+                    return(
+                        <button className='button-card pokemon-move' key={moveIndex} onClick={() => { }}>
+                            <p>{moveObj?.move?.name.replaceAll('-',' ')}</p>
+                        </button>
+                    )
+                })}
+            </div>
         </div>
     )
 }
