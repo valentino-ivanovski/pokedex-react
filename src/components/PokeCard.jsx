@@ -3,6 +3,7 @@ import { useState } from "react"
 import TypeCard from './TypeCard'
 import { getPokedexNumber } from "../utils"
 import { getFullPokedexNumber } from "../utils"
+import Modal from './Modal'
 export default function PokeCard(props){
 
     const {selectedPokemon} = props
@@ -13,12 +14,58 @@ export default function PokeCard(props){
 
     const{name,height,abilities,stats,types,moves,sprites} = data || {} //if data is null, then we will set all of these to null
 
+    const[skill,setSkill] = useState(null)
+
+    const [loadingSkill, setLoadingSkill] = useState(false)
+
     //filter empty sprite elements from the list in api
     const imgList = Object.keys(sprites || {}).filter(val => {
         if (!sprites[val]){return false}
         if(['versions', 'other'].includes(val)){return false}
         return true
     })
+
+    async function fetchMoveData(move,moveUrl){
+        if(loadingSkill || !localStorage || !moveUrl) {return}
+
+    //check cache
+        let cache = {}
+        if (localStorage.getItem('pokemon-moves')){
+            cache = JSON.parse(localStorage.getItem('pokemon-moves'))
+        }
+
+        if(move in cache){
+            setSkill(cache[move])
+            console.log('found move in cache')
+            return
+        }
+
+        try{
+            setLoadingSkill
+            const res = await fetch(moveUrl)
+            const moveData = await res.json()
+            console.log('fetched move data',moveData)
+            const description = moveData?.flavor_text_entries.filter(val => {
+                return val.version_group.name == 'firered-leafgreen'
+            })[0]?.flavor_text
+
+            const skillData = {
+                name: move,
+                description
+            }
+
+            setSkill(skillData)
+
+            cache[move] = skillData
+            localStorage.setItem('pokemon-moves',JSON.stringify(cache))
+
+        }catch(err){
+            console.log(err.message)
+        }finally{
+            setLoadingSkill(false)
+        }
+        setLoadingSkill(false)
+    }
 
     useEffect(() => { //this is a hook that runs every time the selectedPokemon changes
         // if loading, exit
@@ -49,7 +96,7 @@ export default function PokeCard(props){
                 const res = await fetch(finalUrl)
                 const pokemonData = await res.json()
                 setData(pokemonData)
-                console.log(pokemonData)
+                console.log("fetched from api pokemon data")
                 cache[selectedPokemon] = pokemonData 
                 localStorage.setItem('pokedex', JSON.stringify(cache))
             } catch(err){
@@ -75,6 +122,16 @@ export default function PokeCard(props){
 
     return(
         <div className="poke-card">
+            {skill && (<Modal handleCloseModal={() => {setSkill(null)}}> 
+                <div>
+                    <h6>Name</h6>
+                    <h2 className="skill-name">{skill.name}</h2>
+                </div>
+                <div>
+                    <h6>Description</h6>
+                    <p>{skill.description}</p>
+                </div>
+            </Modal>)}
             <div>
                 <h4>#{getFullPokedexNumber(selectedPokemon)}</h4>
                 <h2>{name}</h2>
@@ -102,7 +159,7 @@ export default function PokeCard(props){
                     const {stat,base_stat}= statObj
                     return(
                         <div key={statIndex} className='stat-item'>
-                            <p>{stat?.name.replaceAll('-', ' ')}</p>
+                            <p>{stat?.name}</p>
                             <h4>{base_stat}</h4>
                         </div>
                     )
@@ -112,8 +169,8 @@ export default function PokeCard(props){
             <div className='pokemon-move-grid'>
                 {moves.map((moveObj, moveIndex) => {
                     return(
-                        <button className='button-card pokemon-move' key={moveIndex} onClick={() => { }}>
-                            <p>{moveObj?.move?.name.replaceAll('-',' ')}</p>
+                        <button className='pokemon-move' key={moveIndex} onClick={() => {fetchMoveData(moveObj?.move?.name, moveObj?.move?.url) }}>
+                            <p>{moveObj?.move?.name}</p>
                         </button>
                     )
                 })}
