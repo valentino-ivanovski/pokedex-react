@@ -144,7 +144,8 @@ h3 {
 }
 
 .type-tile {
-  padding: 0.1rem 0.5rem;
+  padding: 0rem 0.5rem;
+  padding-bottom: 0.1rem;
   border-radius: var(--border-radius-small);
   font-size: 0.8rem;
   width: fit-content;
